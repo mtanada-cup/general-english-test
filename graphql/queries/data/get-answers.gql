@@ -1,0 +1,11 @@
+query($type: String) {
+  answersCollection(
+    where: {
+      type: $type
+    }
+  ) {
+     items {
+      answerList
+    }
+  }
+}

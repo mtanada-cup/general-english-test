@@ -1,0 +1,8 @@
+query {
+  questionsCollection {
+    items {
+      question
+      choices
+    }
+  }
+}

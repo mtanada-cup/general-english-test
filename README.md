@@ -1,4 +1,4 @@
-# mtanada-english-frontend
+# General English Assessment
 Maryjes Tanada developer training repository
 
 Likes: 🍦, 🎵, 🍫, 🍝, 🖤 💗 & 🌈

@@ -1,9 +1,12 @@
 <template>
   <section class="question-container">
     <div class="m-4">
-      <h1 class="font-extrabold text-2xl my-4" :class="{'hidden': isSubmitted}"> Test your English </h1>
+      <h1 class="font-extrabold text-2xl my-4" :class="{'hidden': isSubmitted}"> 
+        Test your English
+      </h1>
       <p class="my-10">
-        For the questions below, please choose the best option to complete the sentence or conversation.
+        For the questions below, please choose the best option to
+        complete the sentence or conversation.
       </p>
 
       <div class="page-text">
@@ -13,25 +16,25 @@
         <div class="bar-width" :style="barWidthCalculated"></div>
       </div>
 
-      <fieldset v-for="(item, i) in currentPageQuestions" :key="i">
+      <fieldset v-for="(item, i) in currentPageQuestions" :key=i>
         <legend class="py-4">
           <span class="question-count">
-            <strong>{{ ((pageCount - 1) * questionsPerPage) + ++i }}</strong>
+            <strong>{{ i < 5 ? ((pageCount - 1) * questionsPerPage) + ++i : ++i }}</strong>
           </span>
           <span>
             {{ item.question }}
           </span>
         </legend>
-        <div v-for="(choice, c) in item.choices" :key="c"
+        <div v-for="(choice, c) in item.choices" :key=c
           class="choices"
         >
-          <input
+        <input
             type="radio"
-            :name="setIndex(i, choice)"
+            :name="`${((pageCount - 1) * questionsPerPage) + i}`"
             :value="choice"
             @change="addAnswers(i, choice)"
           >
-          <label :for="choice">
+          <label :for=choice>
             {{ choice }}
           </label>
         </div>
@@ -88,30 +91,35 @@
       }
     },
     mounted() {
-      console.log('q count: ', this.questions.length)
       if (this.questions.length > this.questionsPerPage) {        
         this.batchCount = Math.ceil(this.questions.length / this.questionsPerPage)
-        console.log('this.batchCount: ', this.batchCount)
         
         // batchCount = 10 / 5 = 2
         this.batchQuestions = this.questions.slice(
-          this.currentQuestionIndex,
-          this.lastQuestionIndex + this.questionsPerPage)
+          this.currentQuestionIndex, // 0
+          this.lastQuestionIndex + this.questionsPerPage) // 0 + 5 (0,5)
         
-        this.pageCount++
-        this.lastQuestionIndex = this.batchQuestions.length
-        console.log('this.pageCount: ', this.pageCount)
+        this.pageCount++ // 0++ = 1
+        this.lastQuestionIndex = this.batchQuestions.length 
       }
     },
     computed: {
        // computed property to set the items visible on current page
-      currentPageQuestions(): void {
-        console.log('comp: ', this.batchQuestions)
-        console.log('range 1: ', (this.pageCount - 1) * this.questionsPerPage)
-        console.log('range 2: ', this.pageCount * this.questionsPerPage)
+      currentPageQuestions(): any {
+        if (this.pageCount > 1)  {
+          var newSet = this.batchQuestions.slice(
+            (this.pageCount - 1) * this.questionsPerPage, // 0 * 5 = 0,
+            this.pageCount * this.questionsPerPage // 1 * 5 = 5
+          )
+          var batchQ = {} as any
+          newSet.forEach((item: any, index: any) => {
+            batchQ[index + ((this.pageCount - 1) * this.questionsPerPage)] = item
+          });
+          return batchQ
+        }
         return this.batchQuestions.slice(
-          (this.pageCount - 1) * this.questionsPerPage,
-          this.pageCount * this.questionsPerPage
+          (this.pageCount - 1) * this.questionsPerPage, // 0 * 5 = 0,
+          this.pageCount * this.questionsPerPage // 1 * 5 = 5
         )
       },
       barWidthCalculated(): any {
@@ -120,35 +128,21 @@
         }
       }
     },
-    // watch: {
-    //   batchQuestions(newVal) {
-    //      console.log('watch: ', this.batchQuestions)
-    //     this.currentPageQuestions = newVal.slice((this.currentPage - 1) * this.questionsPerPage, this.currentPage * this.questionsPerPage)
-    //   }
-    // },
     methods: {
       async addAnswers(index: number, answer: string): Promise<void> {
-        const answerIndex = await this.setIndex(index, answer)
+        const answerIndex = await this.setIndex(index)
         this.answers[answerIndex - 1] = answer
-        console.log('answers: ', this.answers)
       },
       submitAnswers(): void {
-        const checkPage = this.batchCount
-        this.isLastPage =  this.pageCount === checkPage-1 ? true : false
         if (this.answers.length < this.questionsPerPage) {
           this.message = 'You must answer all questions before proceeding.'
         } else {
-          console.log('before this.batchQuestions: ', this.batchQuestions)
-          console.log('this.lastQuestionIndex: ', this.lastQuestionIndex)
-          console.log('append: ', this.lastQuestionIndex + this.questionsPerPage)
-
-          if (this.pageCount < this.batchCount) {
-            this.batchQuestions = ([] as any[]).concat( this.batchQuestions,
+          if (this.pageCount < this.batchCount) { // 1 < 5, 2 < 5
+            this.batchQuestions = ([] as any[]).concat(this.batchQuestions,
               this.questions.slice(
                 this.lastQuestionIndex, this.lastQuestionIndex + this.questionsPerPage
               )
             )
-            console.log('after this.batchQuestions: ', this.batchQuestions)
             this.lastQuestionIndex = this.batchQuestions.length
             this.pageCount++
           } else {
@@ -157,10 +151,7 @@
           }
         }
       },
-      setIndex(index: number, choice: string): any {
-        console.log('index: ', index)
-        console.log('name: ', ((this.pageCount - 1) * this.questionsPerPage) + index)
-        console.log('choice: ', choice)
+      setIndex(index: number): any {
         return ((this.pageCount - 1) * this.questionsPerPage) + index
       }
     }
@@ -198,8 +189,6 @@
 
     input:hover, textarea:hover {
       @apply border-0 bg-[#0091ea];
-      /* border: 0 none;
-      background: blue; */
     }
 
     &:hover {
